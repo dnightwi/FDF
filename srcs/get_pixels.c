@@ -36,8 +36,8 @@ int		get_pixels(int fd, t_pixel_data *xyz, t_pixel **pixel)
 			(*pixel)->x = xyz->x;
 			(*pixel)->y = xyz->y;
 			xyz->x++;
+			(*pixel)->next = (t_pixel*)malloc(sizeof(t_pixel));
 			(*pixel) = (*pixel)->next;
-			(*pixel) = (t_pixel*)malloc(sizeof(t_pixel));
 		}
 		xyz->y++;
 	}
