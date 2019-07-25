@@ -29,7 +29,6 @@ typedef struct	s_pixel
 	int			x;
 	int			y;
 	int			z;
-	struct		s_pixel *next;
 }				t_pixel;
 
 struct			s_size
@@ -52,5 +51,6 @@ typedef struct			s_mlx
 	void		*window;	
 }				t_mlx;
 
-int		get_pixels(int fd, t_pixel_data *xyz, t_pixel **pixel);
+t_pixel		*get_pixels(int fd, t_pixel_data *xyz, t_pixel *pixel);
+int		sizeof_file(int fd);
 #endif

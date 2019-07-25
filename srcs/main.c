@@ -102,7 +102,6 @@ void	braz(int *start, int *end, t_pixel_data max_cords, t_mlx mlx)
 int		main(int argc, char **argv)
 {
 	t_pixel				*pixel;
-	t_pixel				*ptr_pxl;
 	struct s_size		size;
 	t_pixel_data		xyz;
 	t_mlx				mlx;
@@ -120,35 +119,38 @@ int		main(int argc, char **argv)
 	if (argc != 2)
 		return (0);
 	fd = open(argv[1], O_RDONLY);
-	pixel = (t_pixel*)malloc(sizeof(t_pixel));
-	ptr_pxl = pixel;
-	get_pixels(fd, &xyz, &pixel);
+	//printf("%d\n", sizeof_file(fd));
+	pixel = (t_pixel *)malloc(sizeof(t_pixel) * sizeof_file(fd));
+	close(fd);
+	fd = open(argv[1], O_RDONLY);
+	pixel = get_pixels(fd, &xyz, pixel);
+	printf("%d", pixel[76].y);
 
 	//xyz.x = xyz.x / 2; //doesnt work properly
 	//xyz.y = xyz.y / 2;
-	free(pixel);
-	pixel = NULL;
+	//free(pixel);
+	//pixel = NULL;
 	mlx.ptr = mlx_init();
 	mlx.window = mlx_new_window(mlx.ptr, 1920, 1080, "FDF");
 	i = 0;
-	pixel = ptr_pxl;
-	while (ptr_pxl->next->next)
+	//pixel = ptr_pxl;
+	/*while (pixel[i])
 	{
-		xy0[0] = ptr_pxl->x;
-		xy0[1] = ptr_pxl->y;
-		xy1[0] = ptr_pxl->next->x;
-		xy1[1] = ptr_pxl->next->y;
-		if (ptr_pxl->x == xyz.x - 1)
+		xy0[0] = pixel[i]->x;
+		xy0[1] = pixel[i]->y;
+		xy1[0] = pixel[i + 1]->x;
+		xy1[1] = pixel[i + 1]->y;
+		if (pixel[i]->x == xyz.x - 1)
 		{
-			ptr_pxl = ptr_pxl->next;
+			i++;
 			continue;
 		}
 		braz(xy0, xy1, xyz, mlx);
 		//mlx_pixel_put(mlx.ptr, mlx.window, 960 - (xyz.x * 30) + (ptr_pxl->x * 30), 540 - (xyz.y * 30) + (ptr_pxl->y * 30), 0xFF0000);
-		ptr_pxl = ptr_pxl->next;
+		i++;
 	}
-	ptr_pxl = pixel;
-	printf("%d\n%d\n", xyz.x, xyz.y);
+	//ptr_pxl = pixel;
+	//printf("%d\n%d\n", xyz.x, xyz.y);
 	while (ptr_pxl->x != xyz.x - 1)
 	{
 		xy0[0] = ptr_pxl->x;
@@ -157,7 +159,7 @@ int		main(int argc, char **argv)
 		xy1[1] = xyz.y;
 		braz(xy0, xy1, xyz, mlx);
 		ptr_pxl = ptr_pxl->next;
-	}
+	}*/
 	//mlx.ptr_image = mlx_new_image(mlx.ptr, 720, 540);
 	//mlx_put_image_to_window(mlx.ptr, mlx.window, mlx.ptr_image, 0, 0);
 	//mlx_pixel_put(mlx.ptr, mlx.window, 960 - xyz.x, 540 - xyz.y, 0xFF0000);
