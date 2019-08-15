@@ -1,4 +1,4 @@
-   /* ************************************************************************** */
+/* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
@@ -12,158 +12,101 @@
 
 #include "../includes/fdf.h"
 
-int		key_exit(int key, void *init)
+void	move_z(t_dta **data)
 {
-	(void)init;
+	int i;
+
+	i = -1;
+	while (++i < (*data)->xyz.x * (*data)->xyz.y)
+		(*data)->pixel[i]->z = (*data)->angle.moves_count
+		* (*data)->pixel[i]->z1;
+}
+
+void	menu(t_mlx mlx)
+{
+	mlx_string_put(mlx.ptr, mlx.window, 75, 10, 3328900, "Menu");
+	mlx_string_put(mlx.ptr, mlx.window, 5, 25, 3328900,
+	"Move image-arrows up, down, left, right");
+	mlx_string_put(mlx.ptr, mlx.window, 5, 40, 3328900, "1 - raise, 2 - lower");
+	mlx_string_put(mlx.ptr, mlx.window, 5, 55, 3328900,
+	"+, -: zoom in, zoom out");
+	mlx_string_put(mlx.ptr, mlx.window, 5, 70, 3328900,
+	"Rotate by axis: W, S, A, D, 9, 0");
+	mlx_string_put(mlx.ptr, mlx.window, 5, 85, 3328900,
+	"Change view angle - I, O");
+}
+
+int		key_hook(int key, t_dta *data)
+{
 	if (key == 53)
-	{
 		exit(1);
+	else if (key == 24 || key == 27)
+		data->xyz.scale += (key == 24) ? 1 : -1;
+	else if (key == 18 || key == 19)
+	{
+		data->angle.moves_count += (key == 18) ? 0.03 : -0.03;
+		move_z(&data);
 	}
-	return(0);
+	else if (key == 126 || key == 125)
+		data->mlx.mv_y += (key == 126) ? -5 : 5;
+	else if (key == 123 || key == 124)
+		data->mlx.mv_x += (key == 123) ? -5 : 5;
+	else if (key == 13 || key == 1)
+		data->angle.x -= (key == 13) ? 0.01 : -0.01;
+	else if (key == 0 || key == 2)
+		data->angle.y -= (key == 0) ? 0.01 : -0.01;
+	else if (key == 25 || key == 29)
+		data->angle.z += (key == 25) ? 0.01 : -0.01;
+	else if (key == 34 || key == 31)
+		data->angle.projection = (key == 34) ? 0.523599 : 0;
+	mlx_clear_window(data->mlx.ptr, data->mlx.window);
+	menu(data->mlx);
+	draw_horizontal(data->pixel, data->xyz, data->mlx, data->angle);
+	return (0);
 }
 
-int		ft_abs(int i)
+void	data_def(t_dta **data, int fd)
 {
-	if (i < 0)
-		i *= -1;
-	return (i);
-}
-
-void	braz(int *start, int *end, t_pixel_data max_cords, t_mlx mlx)
-{
-	int	a;
-	int	b;
-	int	sign;
-	int	signa;
-	int	signb;
-	int	f;
-	int	x;
-	int	y;
-	int	x1;
-	int	y1;
-	int	x0;
-	int	y0;
-
-	//printf("corx = %d\ncory = %d\n\n", cords->x, cords->y);
-	x0 = start[0] * 30; //30 is zoom
-	y0 = start[1] * 30;
-	x1 = end[0] * 30;
-	y1 = end[1] * 30;
-	x = x0;
-	y = y0;
-	a = y1 - y0;
-	b = x0 - x1;
-	f = 0;
-	if (ft_abs(a) > ft_abs(b))
-		sign = 1;
-	else
-		sign = -1;
-	if (a < 0)
-		signa = -1;
-	else
-		signa = 1;
-	if (b < 0)
-		signb = -1;
-	else
-		signb = 1;
-	mlx_pixel_put(mlx.ptr, mlx.window, 960 - (max_cords.x * 30) + x, 540 - (max_cords.y * 30) + y, 0xFF0000);
-	if (sign == -1)
-	{
-		while (x != x1 || y != y1)
-		{
-			f += a * signa;
-			if (ft_abs(f) > ft_abs(f - ft_abs(b)))
-			{
-				f -= b * signb;
-				y += signa;
-			}
-			x -= signb;
-			mlx_pixel_put(mlx.ptr, mlx.window, 960 - (max_cords.x * 30) + x, 540 - (max_cords.y * 30) + y, 0xFF0000);
-
-		}
-	}
-	else
-	{
-		while (x != x1 || y != y1)
-		{
-			f += b * signb;
-			if (ft_abs(f) > ft_abs(f - ft_abs(a)))
-			{
-				f -= a * signa;
-				x -= signb;
-			}
-			y += signa;
-			mlx_pixel_put(mlx.ptr, mlx.window, 960 - (max_cords.x * 30) + x, 540 - (max_cords.y * 30) + y, 0xFF0000);
-		}
-	}
-	
+	(*data) = (t_dta*)malloc(sizeof(t_dta));
+	(*data)->xyz.max_z = 0;
+	(*data)->xyz.min_z = 0;
+	(*data)->pixel = init_pixel(fd);
+	(*data)->angle.x = 0;
+	(*data)->angle.y = 0;
+	(*data)->angle.z = 0;
+	(*data)->mlx.mv_x = 0;
+	(*data)->mlx.mv_y = 0;
+	(*data)->angle.moves_count = 1;
+	(*data)->angle.projection = 0.523599;
+	(*data)->xyz.weight = 0;
+	(*data)->xyz.y = 0;
+	(*data)->xyz.x = 0;
 }
 
 int		main(int argc, char **argv)
 {
-	t_pixel				*pixel;
+	t_pixel				**pixel;
+	t_dta				*data;
 	struct s_size		size;
-	t_pixel_data		xyz;
-	t_mlx				mlx;
 	int					fd;
-	int 				i;
-	int					xy0[2];
-	int					xy1[2];
 
-
-	size.height = 0;
-	size.width = 0;
-	xyz.x = 0;
-	xyz.y = 0;
-	xyz.z = 0;
 	if (argc != 2)
-		return (0);
+		ft_putendl("Usage: ./fdf [file]");
 	fd = open(argv[1], O_RDONLY);
-	//printf("%d\n", sizeof_file(fd));
-	pixel = (t_pixel *)malloc(sizeof(t_pixel) * sizeof_file(fd));
-	close(fd);
-	fd = open(argv[1], O_RDONLY);
-	pixel = get_pixels(fd, &xyz, pixel);
-	printf("%d", pixel[76].y);
-
-	//xyz.x = xyz.x / 2; //doesnt work properly
-	//xyz.y = xyz.y / 2;
-	//free(pixel);
-	//pixel = NULL;
-	mlx.ptr = mlx_init();
-	mlx.window = mlx_new_window(mlx.ptr, 1920, 1080, "FDF");
-	i = 0;
-	//pixel = ptr_pxl;
-	/*while (pixel[i])
+	if (fd < 0)
 	{
-		xy0[0] = pixel[i]->x;
-		xy0[1] = pixel[i]->y;
-		xy1[0] = pixel[i + 1]->x;
-		xy1[1] = pixel[i + 1]->y;
-		if (pixel[i]->x == xyz.x - 1)
-		{
-			i++;
-			continue;
-		}
-		braz(xy0, xy1, xyz, mlx);
-		//mlx_pixel_put(mlx.ptr, mlx.window, 960 - (xyz.x * 30) + (ptr_pxl->x * 30), 540 - (xyz.y * 30) + (ptr_pxl->y * 30), 0xFF0000);
-		i++;
+		ft_putendl("Invalid file");
+		return (1);
 	}
-	//ptr_pxl = pixel;
-	//printf("%d\n%d\n", xyz.x, xyz.y);
-	while (ptr_pxl->x != xyz.x - 1)
-	{
-		xy0[0] = ptr_pxl->x;
-		xy0[1] = ptr_pxl->y;
-		xy1[0] = ptr_pxl->x;
-		xy1[1] = xyz.y;
-		braz(xy0, xy1, xyz, mlx);
-		ptr_pxl = ptr_pxl->next;
-	}*/
-	//mlx.ptr_image = mlx_new_image(mlx.ptr, 720, 540);
-	//mlx_put_image_to_window(mlx.ptr, mlx.window, mlx.ptr_image, 0, 0);
-	//mlx_pixel_put(mlx.ptr, mlx.window, 960 - xyz.x, 540 - xyz.y, 0xFF0000);
-	mlx_key_hook(mlx.window, key_exit, mlx.ptr);
-	mlx_loop(mlx.ptr);
+	data_def(&data, fd);
+	fd = open(argv[1], O_RDONLY);
+	get_pixels(fd, &(data->xyz), data->pixel);
+	data->xyz.scale = scale(data->pixel, data->xyz, data->angle);
+	data->mlx.ptr = mlx_init();
+	data->mlx.window = mlx_new_window(data->mlx.ptr, 1920, 1080, argv[1]);
+	menu(data->mlx);
+	draw_horizontal(data->pixel, data->xyz, data->mlx, data->angle);
+	mlx_hook(data->mlx.window, 2, 0, (int (*)())key_hook, data);
+	mlx_loop(data->mlx.ptr);
 	return (0);
 }

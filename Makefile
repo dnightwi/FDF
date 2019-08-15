@@ -6,7 +6,7 @@
 #    By: rsticks <rsticks@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/07/21 17:06:57 by rsticks           #+#    #+#              #
-#    Updated: 2019/07/21 18:57:27 by rsticks          ###   ########.fr        #
+#    Updated: 2019/08/15 19:40:43 by dnightwi         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,7 +30,7 @@ HEADERS_DIRECTORY = ./includes/
 HEADERS = $(addprefix $(HEADERS_DIRECTORY), $(HEADERS_LIST))
 
 SOURCES_DIRECTORY = ./srcs/
-SOURCES_LIST = main.c get_pixels.c
+SOURCES_LIST = main.c get_pixels.c init.c magic.c magic_2.c brezenheim.c iso.c
 SOURCES = $(addprefix $(SOURCES_DIRECTORY), $(SOURCES_LIST))
 
 OBJECTS_DIRECTORY = obj/
